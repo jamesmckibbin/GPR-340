@@ -2,7 +2,7 @@ mode = "fill"
 
 local agents = {}
 
-function checkPos(agent)
+function checkScreenWrap(agent)
 	if agent.x > love.graphics.getWidth() then
 		agent.x = 0
 	end
@@ -55,7 +55,7 @@ end
 function love.update(dt)
 	for i, agent in ipairs(agents) do
 		local neighbors = {}
-		checkPos(agent)
+		checkScreenWrap(agent)
 		for j, other in ipairs(agents) do
 			if i ~= j and math.sqrt(math.pow(agent.x - other.x, 2) + math.pow(agent.y - other.y, 2)) <= agent.proximity then
 				table.insert(neighbors, other)
