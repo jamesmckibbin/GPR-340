@@ -1,84 +1,35 @@
-mode = "fill"
+local Grid = require("grid")
+local Boids = require("boids")
 
-local agents = {}
+tilemap = nil
+local flock = nil
 
-function checkScreenWrap(agent)
-	if agent.x > love.graphics.getWidth() then
-		agent.x = 0
-	end
-	if agent.x < 0 then
-		agent.x = love.graphics.getWidth()
-	end
-	if agent.y > love.graphics.getHeight() then
-		agent.y = 0
-	end	
-	if agent.y < 0 then
-		agent.y = love.graphics.getHeight()
-	end
-end
-
-local crowded_behavior = function(agent, neighbors)
-	if #neighbors >= 5 then
-		agent.isSurrounded = true
-	else
-		agent.isSurrounded = false
-	end
-end
-
-local separation_behavior = function(agent, neighbors)
-	local avg = {x=0, y=0}
-	for i, other in ipairs(neighbors) do
-		avg.x = avg.x + other.x
-		avg.y = avg.y + other.y
-	end
-	avg.x = avg.x / #neighbors
-	avg.y = avg.y / #neighbors
-	
-	local angle = math.atan2(avg.y - agent.y, avg.x - agent.x)
-end
+tile_width = 16
+tile_height = 16
 
 function love.load()
-	for i = 1, 200 do
-		table.insert(agents, {
-			x = 64,
-			y = 64,
-			radius = 8,
-			bradius = 12,
-			vx = (math.random() * 2 - 1) * 100,
-			vy = (math.random() * 2 - 1) * 100,
-			isSurrounded = false,
-			proximity = 20,
-		})
-	end
+	tilemap = Grid.new(64, 64)
+	Boids.init(1)
 end
 
 function love.update(dt)
-	for i, agent in ipairs(agents) do
-		local neighbors = {}
-		checkScreenWrap(agent)
-		for j, other in ipairs(agents) do
-			if i ~= j and math.sqrt(math.pow(agent.x - other.x, 2) + math.pow(agent.y - other.y, 2)) <= agent.proximity then
-				table.insert(neighbors, other)
-			end
-		end
-		crowded_behavior(agent, neighbors)
-		agent.x = agent.x + (agent.vx * dt)
-		agent.y = agent.y + (agent.vy * dt)
-	end
+	Boids.update(dt)
+end
+
+function love.mousepressed(x, y, button)
+	local gx = math.floor(x / tile_width)
+	local gy = math.floor(y / tile_height)
+
+	tilemap:set(gx, gy, 1)
 end
 
 function love.draw()
-	for i, agent in ipairs(agents) do
-		if agent.isSurrounded then
-			love.graphics.setColor(1, 0, 0, 1)
-			love.graphics.circle(mode, agent.x, agent.y, agent.bradius)
-			love.graphics.setColor(1, 0, 0, 1)
-			love.graphics.circle(mode, agent.x, agent.y, agent.radius)
-		else
-			love.graphics.setColor(1, 1, 0, 1)
-			love.graphics.circle(mode, agent.x, agent.y, agent.bradius)
-			love.graphics.setColor(0, 1, 1, 1)
-			love.graphics.circle(mode, agent.x, agent.y, agent.radius)
+	for i = 0, tilemap.height do
+		for j = 0, tilemap.width do
+			local fill = tilemap:get(i, j) == 1 and "fill" or "line"
+			love.graphics.rectangle(fill, i * tile_height, j * tile_width, tile_height, tile_width)
 		end
 	end
+
+	Boids.draw()
 end
