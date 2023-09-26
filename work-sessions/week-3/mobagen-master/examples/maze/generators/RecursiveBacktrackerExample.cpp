@@ -52,6 +52,8 @@ void RecursiveBacktrackerExample::Clear(World* world) {
       visited[i][j] = false;
     }
   }
+
+  initialized = false;
 }
 Point2D RecursiveBacktrackerExample::randomStartPoint(World* world) {
   auto sideOver2 = world->GetSize() / 2;
