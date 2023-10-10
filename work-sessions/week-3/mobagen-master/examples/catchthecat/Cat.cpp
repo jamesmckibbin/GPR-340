@@ -1,24 +1,44 @@
 #include "Cat.h"
-#include "World.h"
-#include <stdexcept>
 
-Point2D Cat::Move(World* world) {
-  auto rand = Random::Range(0, 5);
+#include <map>
+
+#include "World.h"
+
+Point2D Cat::Move(World* world)
+{
   auto pos = world->getCat();
-  switch (rand) {
-    case 0:
-      return World::NE(pos);
-    case 1:
-      return World::NW(pos);
-    case 2:
-      return World::E(pos);
-    case 3:
-      return World::W(pos);
-    case 4:
-      return World::SW(pos);
-    case 5:
-      return World::SE(pos);
-    default:
-      throw "random out of range";
+  std::map<Point2D, int> costList;
+
+  for (int y = -world->getWorldSideSize(); y <= world->getWorldSideSize(); y++) 
+  {
+    for (int x = -world->getWorldSideSize(); x <= world->getWorldSideSize(); x++) 
+    {
+      Point2D point = Point2D(x, y);
+      costList[point] = Random::Range(0, 10);
+    }
   }
+
+  Point2D pointToMoveTo = pos;
+  int costToMoveTo = 0;
+
+  for (auto neighbor : world->neighbors(pos)) 
+  {
+    if (world->catCanMoveToPosition(neighbor)) 
+    {
+      if (costToMoveTo == 0) 
+      {
+        costToMoveTo = costList[neighbor];
+        pointToMoveTo = neighbor;
+      }
+      else if (costToMoveTo >= costList[neighbor]) 
+      {
+        costToMoveTo = costList[neighbor];
+        pointToMoveTo = neighbor;
+      }
+    }
+  }
+
+  return pointToMoveTo;
 }
+
+

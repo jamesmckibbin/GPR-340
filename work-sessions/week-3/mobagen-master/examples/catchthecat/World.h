@@ -8,6 +8,7 @@
 #include "Random.h"
 #include <bitset>
 #include <iostream>
+#include <SDL_render.h>
 #include <vector>
 
 class World : GameObject {
